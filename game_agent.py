@@ -170,6 +170,75 @@ class MinimaxPlayer(IsolationPlayer):
         # Return the best move from the last completed search iteration
         return best_move
 
+    def __min(self, game, depth):
+        """Search for the minimum score of the game and return the game board
+        before the time limit expires. This function emulates the minimizing
+        node of the minimax tree by using the maximum values of the previous
+        game states.
+
+        Parameters
+        ----------
+        game : `isolation.Board`
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+
+        depth : depth
+            The current search depth of the minimax tree, if this depth is 0
+            then the leaf node is reached and hence the current depth is
+            returned.
+
+        Returns
+        -------
+        game : `isolation.Board`
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if depth == 0:      #leaf node is reached.
+            return self.score(game, self)
+
+        min_score = float("inf")
+        for move in game.get_legal_moves():
+            new_game = game.forecast_move(move) #find the minimum of the next max nodes
+            min_score = min(min_score, self.__max(new_game, depth-1))
+
+        return min_score
+
+
+    def __max(self, game, depth):
+        """Search for the maximum score of the game and return the game board
+        before the time limit expires.
+        this function emulates a maximizing node by using the minimum values
+        of the previous game states.
+
+        Parameters
+        ----------
+        game : `isolation.Board`
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+
+        depth : depth
+            The current search depth of the minimax tree, if this depth is 0
+            then the leaf node is reached and hence the current depth is
+            returned.
+
+        Returns
+        -------
+        game : `isolation.Board`
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if depth == 0:          #leaf node is reached
+            return self.score(game, self)
+
+        max_score = float("-inf")
+        for move in game.get_legal_moves():
+            new_game = game.forecast_move(move)
+            max_score = max(max_score, self.__min(new_game, depth-1))
+
+        return max_score
+
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
         the lectures.
@@ -212,9 +281,16 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        max_score = float("-inf")   #max score set to lowest value.
+        best_move = (-1,-1)         #max move set to default.
+        for move in game.get_legal_moves():
+            new_game = game.forecast_move(move)
+            new_score = self.__min(new_game, depth-1)
+            if new_score >= max_score:
+                max_score = new_score
+                best_move = move
 
+        return best_move
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
