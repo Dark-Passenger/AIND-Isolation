@@ -281,8 +281,8 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        max_score = float("-inf")   #max score set to lowest value.
-        best_move = (-1,-1)         #max move set to default.
+        max_score = float("-inf")
+        best_move = (-1,-1)
         for move in game.get_legal_moves():
             new_game = game.forecast_move(move)
             new_score = self.__min(new_game, depth-1)
